@@ -1,28 +1,43 @@
 import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 // import gsap from "gsap";
 
-// Cursor
-window.addEventListener("mousemove", (event) => {
-  console.log(event.clientX);
+// Size
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
+
+//Renderer
+const canvas = document.querySelector(".webgl");
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas,
 });
+
+renderer.setSize(sizes.width, sizes.height);
 
 // Scene
 const scene = new THREE.Scene();
 
-// Size
-const sizes = {
-  width: 800,
-  height: 600,
-};
-
 // Time
-let time = Date.now();
+// let time = Date.now();
 
 // Clock
 const clock = new THREE.Clock();
 
-// Objects
+// Cursor
+const cursor = {
+  x: 0,
+  y: 0,
+};
 
+// Cursor Event Listener
+window.addEventListener("mousemove", (event) => {
+  cursor.x = event.clientX / sizes.width - 0.5;
+  cursor.y = event.clientY / sizes.height - 0.5;
+});
+
+// Create Objects
 const group = new THREE.Group();
 scene.add(group);
 
@@ -47,21 +62,30 @@ const cube3 = new THREE.Mesh(
 
 group.add(cube3);
 
-// Position
+// Position Objects
 cube1.position.x = -2;
 cube2.position.x = 2;
 group.position.y = 1;
 group.rotation.x = -2;
 
-//Scale
-// mesh.scale.x = 2;
-// group.scale.set(2, 0.5, 0.5);
+//Resize
+window.addEventListener("resize", () => {
+  //Update sizes
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
 
-// Rotation
-// group.rotation.y = Math.PI / 2;
+  //Update camera
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix;
 
-// Camera
+  //Update renderer
+  renderer.setSize(sizes.width, sizes.height);
 
+  // Update Pixel Ratio
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+// Create Camera
 const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
@@ -71,16 +95,15 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.z = 3;
 scene.add(camera);
 
-//Renderer
-const canvas = document.querySelector(".webgl");
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
-});
-renderer.setSize(sizes.width, sizes.height);
+// Create Controls
+const controls = new OrbitControls(camera, canvas);
+controls.target.y = 1;
+
+controls.enableDamping = true;
 
 // Animations
 const tick = () => {
-  // Time
+  // Alternativa con Time
   // const currentTime = Date.now();
   // const deltaTime = currentTime - time;
   // time = currentTime;
@@ -89,13 +112,23 @@ const tick = () => {
   //Clock
   const elapsedTime = clock.getElapsedTime();
 
-  // Update object
+  // Update camera
   // camera.position.z = Math.sin(elapsedTime);
   // camera.position.y = Math.cos(elapsedTime);
+
+  // camera.position.x = cursor.x * 10;
+  // camera.position.y = cursor.y * -10;
+
+  // camera.position.x = Math.sin(cursor.x * Math.PI) * 3;
+  // camera.position.z = Math.cos(cursor.x * Math.PI) * 3;
+
   // camera.lookAt(group.position);
 
   //Gsap
   // gsap.to(group.position, { duration: 1, delay: 1, x: 2 });
+
+  //Update controls
+  controls.update();
 
   // Renderer
   renderer.render(scene, camera);
@@ -105,5 +138,3 @@ const tick = () => {
 tick();
 
 // mesh.position.normalize();
-// console.log(mesh.position.length());
-// console.log(mesh.position.distanceTo(camera.position));
